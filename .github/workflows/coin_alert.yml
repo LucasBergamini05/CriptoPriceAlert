@@ -26,5 +26,5 @@ jobs:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-          BINANCE_API_LINK: ${{ env.BINANCE_API_LINK }}
+          BINANCE_API_LINK: ${{ vars.BINANCE_API_LINK }}
         run: python alert.py
