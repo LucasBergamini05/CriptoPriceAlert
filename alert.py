@@ -79,15 +79,12 @@ def send_email(assets):
     msg["From"] = EMAIL_USER
     msg["To"] = EMAIL_TO
 
-    try:
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.starttls()
-        server.login(EMAIL_USER, EMAIL_PASS)
-        server.sendmail(EMAIL_USER, EMAIL_TO, msg.as_string())
-        server.quit()
-        print("📩 E-mail enviado com sucesso!")
-    except Exception as e:
-        print("Erro ao enviar e-mail:", e)
+    server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    server.starttls()
+    server.login(EMAIL_USER, EMAIL_PASS)
+    server.sendmail(EMAIL_USER, EMAIL_TO, msg.as_string())
+    server.quit()
+    print("📩 E-mail enviado com sucesso!")
 
 # 🚀 Fluxo Principal
 def main():
