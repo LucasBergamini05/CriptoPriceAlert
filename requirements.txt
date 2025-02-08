@@ -1,4 +1,4 @@
 requests
 pandas
 ta
-dotenv
+python-dotenv
