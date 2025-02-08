@@ -15,12 +15,19 @@ SMTP_PORT = 587
 EMAIL_TO = os.getenv("EMAIL_TO")
 
 # Envia e-mail com os ativos que romperam a banda inferior
-def send_email(assets):
+def send_email(assets_notes):
     # if not assets:
     #     return
     
-    subject = "⚠️ Alerta de Criptomoeda - Banda de Bollinger"
-    body = f"As seguintes criptomoedas estão fora das bandas de Bollinger de 3 desvios:\n\n" + "\n".join(assets)
+    subject = "⚠️ Alerta de Criptomoeda"
+
+    body = ""
+
+    for pair, notes in assets_notes.items():
+        body += f"{pair}:\n"
+        for note in notes:
+            body += f" - {note}\n"
+        body += "\n"
     
     msg = MIMEText(body)
     msg["Subject"] = subject

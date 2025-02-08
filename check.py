@@ -6,14 +6,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Número de ativos a serem verificados
+NUM_ASSETS = int(os.getenv("NUM_ASSETS"))
+
 # URL da API da Binance 
 # (No GitHub, é binance.us, mas, localmente, é binance.com)
 BINANCE_API_LINK = os.getenv("BINANCE_API_LINK")
 
-# Obtém os top 50 ativos da CoinGecko
-def get_top_100_symbols():
+# Obtém os ativos da CoinGecko
+def get_top_symbols():
     url = "https://api.coingecko.com/api/v3/coins/markets"
-    params = {"vs_currency": "usd", "order": "market_cap_desc", "per_page": 10, "page": 1}
+    params = {"vs_currency": "usd", "order": "market_cap_desc", "per_page": NUM_ASSETS, "page": 1}
     response = requests.get(url, params=params)
     data = response.json()
     symbols = [coin["symbol"].upper() + "USDT" for coin in data]  # Adiciona 'USDT' para corresponder aos pares na Binance
@@ -37,28 +40,52 @@ def get_klines(symbol):
     df["close"] = df["close"].astype(float)
     return df
 
-# Calcula Bandas de Bollinger e verifica se está abaixo da inferior
-def check_bollinger_breach(symbol):
-    df = get_klines(symbol)
-    if df is None:
-        return False
-
+# Verifica se o preço de fechamento está fora das Bandas de Bollinger
+def check_bollinger_breach(df):
     # Calcula as Bandas de Bollinger (20 períodos, 3 desvios padrão)
     indicator_bb = ta.volatility.BollingerBands(close=df["close"], window=20, window_dev=3)
     df["bb_lower"] = indicator_bb.bollinger_lband()
     df["bb_upper"] = indicator_bb.bollinger_hband()
     
-    # Verifica se o preço atual está abaixo da banda inferior
+    # Compara o preço de fechamento com as bandas
     last_close = df["close"].iloc[-1]
     last_bb_lower = df["bb_lower"].iloc[-1]
     last_bb_upper = df["bb_upper"].iloc[-1]
     
-    return last_close < last_bb_lower or last_close > last_bb_upper
+    if(last_close < last_bb_lower):
+        return -1
+    
+    if(last_close > last_bb_upper):
+        return 1
+    
+    return 0
+
+
+def check_symbol(symbol):
+    notes = []
+
+    df = get_klines(symbol)
+    if df is None:
+        return notes
+    
+    bollinger_note = check_bollinger_breach(df)
+
+    if bollinger_note == -1:
+        notes.append("Preço abaixo da Banda Inferior de Bollinger ↘️")
+
+    elif bollinger_note == 1:
+        notes.append("Preço acima da Banda Superior de Bollinger ↗️")
+    
+
+    return notes
 
 def check():
-    symbols = get_top_100_symbols()
-    print(symbols)
-    breached_assets = [symbol for symbol in symbols if check_bollinger_breach(symbol)]
-    print(breached_assets)
+    symbols = get_top_symbols()
+    symbols_notes = {}
+
+    for symbol in symbols:
+        notes = check_symbol(symbol)
+        if len(notes):
+            symbols_notes[symbol] = notes
     
-    return breached_assets
+    return symbols_notes
