@@ -2,8 +2,11 @@ import requests
 import pandas as pd
 import ta
 import smtplib
+from dotenv import load_dotenv
 import os
 from email.mime.text import MIMEText
+
+load_dotenv()
 
 # Configurações do e-mail
 EMAIL_USER = os.getenv("EMAIL_USER")
@@ -13,6 +16,8 @@ SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
 EMAIL_TO = os.getenv("EMAIL_TO")
+
+BINANCE_API_LINK = os.getenv("BINANCE_API_LINK")
 
 # Obtém os top 100 ativos da CoinGecko
 def get_top_100_symbols():
@@ -25,7 +30,7 @@ def get_top_100_symbols():
 
 # Obtém os últimos 20 candles de 4h para um ativo
 def get_klines(symbol):
-    url = f"https://api.binance.us/api/v3/klines"
+    url = f"{BINANCE_API_LINK}/api/v3/klines"
 
     params = {"symbol": symbol, "interval": "4h", "limit": 20}
 
