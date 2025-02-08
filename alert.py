@@ -25,7 +25,7 @@ def get_top_100_symbols():
 
 # Obtém os últimos 20 candles de 4h para um ativo
 def get_klines(symbol):
-    url = f"https://api.binance.com/api/v3/klines"
+    url = f"https://api.binance.us/api/v3/klines"
 
     params = {"symbol": symbol, "interval": "4h", "limit": 20}
 
