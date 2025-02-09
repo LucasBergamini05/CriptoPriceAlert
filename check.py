@@ -9,8 +9,12 @@ def check():
             # Pega as configurações da aba correspondente
             df = get_settings(alert_name)
 
-            if(df is None):
+            if df is None:
                 print(f"Erro ao buscar configurações para {alert_name}")
+                continue
+
+            if df["Ativo"].isna().all():
+                print(f"Sem ativos configurados para {alert_name}")
                 continue
 
             # Chama a função do alerta com os dados obtidos
