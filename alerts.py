@@ -1,6 +1,6 @@
 import pandas as pd
 from fetch import get_klines
-from technical_analisys import check_bollinger_breach, calculate_sma
+from technical_analisys import check_bollinger_breach, calculate_sma, compare_values
 
 # Realiza a verificação da BB nos ativos com suas respectivas configurações
 def handle_bollinger_alert(df: pd.DataFrame):
@@ -61,8 +61,44 @@ def handle_volume_alert(df: pd.DataFrame):
 
     return symbols_notes
 
+def handle_current_price_alert(df: pd.DataFrame):
+    # Configurações padrão
+    default_settings = {"interval": "4h"}
+
+    # Converte os valores para o formato correto e preenche com as configurações padrão
+    df["interval"] = df["Tempo Gráfico"].apply(lambda x: default_settings["interval"] if pd.isna(x) else x)
+    df["price"] = df["Valor"]
+    df["type"] = df["Tipo"]
+
+    # Cria um dicionário com as configurações
+    price_settings = df.set_index("Ativo")[["interval", "price", "type"]].to_dict(orient="index")
+
+    # Verifica os ativos
+    symbols_notes = {}
+    for symbol, settings in price_settings.items():
+        df = get_klines(symbol, interval=settings["interval"], limit=1)
+        if df is None:
+            continue
+
+        last_price = float(df["close"].iloc[-1])
+        price = settings["price"]
+        type = settings["type"]
+
+        message_map = {
+            ">": f"Preço acima de {price} ↗️",
+            "<": f"Preço abaixo de {price} ↘️",
+            ">=": f"Preço igual ou acima de {price} ↗️",
+            "<=": f"Preço igual ou abaixo de {price} ↘️"
+        }
+
+        if type in message_map and compare_values(price, last_price, type):
+            symbols_notes[symbol] = message_map.get(type)
+
+    return symbols_notes
+        
 
 ALERTS_MAP = {
     "Bollinger Bands": handle_bollinger_alert,
-    "Volume": handle_volume_alert
+    "Volume": handle_volume_alert,
+    "Valor Atual": handle_current_price_alert
 }
