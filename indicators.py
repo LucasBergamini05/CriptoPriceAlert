@@ -1,9 +1,9 @@
 import pandas as pd
 from fetch import get_klines
-from technical_analisys import check_bollinger_breach
+from technical_analisys import check_bollinger_breach, calculate_sma
 
 # Realiza a verificação da BB nos ativos com suas respectivas configurações
-def handle_bollinger_indicator(df):
+def handle_bollinger_indicator(df: pd.DataFrame):
     # Configurações padrão
     default_settings = {"interval": "4h", "window": 20, "window_dev": 3}
 
@@ -22,18 +22,47 @@ def handle_bollinger_indicator(df):
         if df is None:
             continue
         
-        bollinger_note = check_bollinger_breach(df, window=settings["window"], window_dev=settings["window_dev"])
+        result = check_bollinger_breach(df, window=settings["window"], window_dev=settings["window_dev"])
 
-        if bollinger_note == -1:
+        if result == -1:
             symbols_notes[symbol] = "Preço abaixo da Banda Inferior de Bollinger ↘️"
             continue
 
-        if bollinger_note == 1:
+        if result == 1:
             symbols_notes[symbol] = "Preço acima da Banda Superior de Bollinger ↗️"
       
     return symbols_notes
 
+def handle_volume_indicator(df: pd.DataFrame):
+    # Configurações padrão
+    default_settings = {"interval": "4h", "window": 20}
+
+    # Converte os valores para o formato correto e preenche com as configurações padrão
+    df["interval"] = df["Tempo Gráfico"].apply(lambda x: default_settings["interval"] if pd.isna(x) else x)
+    df["window"] = pd.to_numeric(df["Intervalo"], errors="coerce").apply(lambda x: default_settings["window"] if pd.isna(x) else int(x))
+
+    # Cria um dicionário com as configurações
+    volume_settings = df.set_index("Ativo")[["interval", "window"]].to_dict(orient="index")
+
+    # Verifica os ativos
+    symbols_notes = {}
+    for symbol, settings in volume_settings.items():
+        df = get_klines(symbol, interval=settings["interval"], limit=settings["window"])
+        if df is None:
+            continue
+        
+        result = calculate_sma(df["volume"], window=settings["window"])
+
+        last_volume = float(df["volume"].iloc[-1])
+        last_volume_median = float(result.iloc[-1])
+
+        if last_volume > last_volume_median:
+            symbols_notes[symbol] = "Volume acima da média ↗️"
+
+    return symbols_notes
+
 
 INDICATORS_MAP = {
-    "Bollinger Bands": handle_bollinger_indicator
+    "Bollinger Bands": handle_bollinger_indicator,
+    "Volume": handle_volume_indicator
 }
