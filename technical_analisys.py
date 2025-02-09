@@ -26,17 +26,17 @@ def calculate_sma(series: pd.Series, window=20):
     return series.rolling(window=window).mean()
 
 def compare_values(first_value, second_value, type):
-    def is_price_above(price, last_price):
-        return last_price > price
+    def is_price_above(first_value, second_value):
+        return first_value > second_value
 
-    def is_price_below(price, last_price):
-        return last_price < price
+    def is_price_below(first_value, second_value):
+        return first_value < second_value
 
-    def is_price_equal_or_above(price, last_price):
-        return last_price >= price
+    def is_price_equal_or_above(first_value, second_value):
+        return first_value >= second_value
 
-    def is_price_equal_or_below(price, last_price):
-        return last_price <= price
+    def is_price_equal_or_below(first_value, second_value):
+        return first_value <= second_value
 
     type_map = {
         ">": is_price_above,

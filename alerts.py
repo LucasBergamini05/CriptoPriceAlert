@@ -91,7 +91,7 @@ def handle_current_price_alert(df: pd.DataFrame):
             "<=": f"Preço igual ou abaixo de {price} ↘️"
         }
 
-        if type in message_map and compare_values(price, last_price, type):
+        if type in message_map and compare_values(last_price, price, type):
             symbols_notes[symbol] = message_map.get(type)
 
     return symbols_notes
