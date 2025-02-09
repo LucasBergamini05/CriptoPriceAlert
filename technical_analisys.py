@@ -25,6 +25,10 @@ def check_bollinger_breach(df: pd.DataFrame, window=20, window_dev=3):
 def calculate_sma(series: pd.Series, window=20):
     return series.rolling(window=window).mean()
 
+def calculate_ema(series: pd.Series, window=20):
+    return series.ewm(span=window, adjust=False).mean()
+
+# Compara dois valores de acordo com o tipo de comparação
 def compare_values(first_value, second_value, type):
     def is_price_above(first_value, second_value):
         return first_value > second_value
