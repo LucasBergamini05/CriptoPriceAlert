@@ -14,10 +14,10 @@ SMTP_PORT = 587
 
 EMAIL_TO = os.getenv("EMAIL_TO")
 
-# Envia e-mail com os ativos que romperam a banda inferior
+# Envia e-mail com os ativos e seus alertas
 def send_email(assets_notes):
-    # if not assets:
-    #     return
+    if not assets_notes:
+        return
     
     subject = "⚠️ Alerta de Criptomoeda"
 
