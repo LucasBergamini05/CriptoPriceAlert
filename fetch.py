@@ -19,7 +19,7 @@ def get_settings(sheet):
     df = pd.read_csv(sheet_url)
 
     # Verifica se o indicador procurado é o mesmo da aba 
-    if(df["Indicador"][0] != sheet):
+    if(df["Alerta"][0] != sheet):
         return None
 
     return df
