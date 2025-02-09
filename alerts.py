@@ -2,15 +2,22 @@ import pandas as pd
 from fetch import get_klines
 from technical_analisys import check_bollinger_breach, calculate_sma, calculate_ema, compare_values
 
+# Função para preparar o DataFrame
+def prepare_dataframe(df, column_map):
+    # Ajusta os nomes das colunas, preenche valores NaN e converte colunas para os tipos corretos.
+    for col, (sheet_col,default, dtype) in column_map.items():
+        df[col] = pd.to_numeric(df[sheet_col], errors="coerce") if dtype in [int, float] else df[sheet_col]
+        df[col] = df[col].apply(lambda x: default if pd.isna(x) else dtype(x))
+    return df
+
 # Realiza a verificação da BB nos ativos com suas respectivas configurações
 def handle_bollinger_alert(df: pd.DataFrame):
-    # Configurações padrão
-    default_settings = {"interval": "4h", "window": 20, "window_dev": 3}
-
-    # Converte os valores para o formato correto e preenche com as configurações padrão
-    df["interval"] = df["Tempo Gráfico"].apply(lambda x: default_settings["interval"] if pd.isna(x) else x)
-    df["window"] = pd.to_numeric(df["Intervalo"], errors="coerce").apply(lambda x: default_settings["window"] if pd.isna(x) else int(x))
-    df["window_dev"] = pd.to_numeric(df["Desvio"], errors="coerce").apply(lambda x: default_settings["window_dev"] if pd.isna(x) else float(x))
+    # Formata o DataFrame
+    df = prepare_dataframe(df, {
+        "interval": ("Tempo Gráfico", "4h", str),
+        "window": ("Intervalo", 20, int),
+        "window_dev": ("Desvio", 3, float)
+    })
 
     # Cria um dicionário com as configurações
     bollinger_settings = df.set_index("Ativo")[["interval", "window", "window_dev"]].to_dict(orient="index")
@@ -34,12 +41,11 @@ def handle_bollinger_alert(df: pd.DataFrame):
     return symbols_notes
 
 def handle_volume_alert(df: pd.DataFrame):
-    # Configurações padrão
-    default_settings = {"interval": "4h", "window": 20}
-
-    # Converte os valores para o formato correto e preenche com as configurações padrão
-    df["interval"] = df["Tempo Gráfico"].apply(lambda x: default_settings["interval"] if pd.isna(x) else x)
-    df["window"] = pd.to_numeric(df["Intervalo"], errors="coerce").apply(lambda x: default_settings["window"] if pd.isna(x) else int(x))
+    # Formata o DataFrame
+    prepare_dataframe(df, {
+        "interval": ("Tempo Gráfico", "4h", str),
+        "window": ("Intervalo", 20, int)
+    })
 
     # Cria um dicionário com as configurações
     volume_settings = df.set_index("Ativo")[["interval", "window"]].to_dict(orient="index")
@@ -62,13 +68,12 @@ def handle_volume_alert(df: pd.DataFrame):
     return symbols_notes
 
 def handle_current_price_alert(df: pd.DataFrame):
-    # Configurações padrão
-    default_settings = {"interval": "4h"}
-
-    # Converte os valores para o formato correto e preenche com as configurações padrão
-    df["interval"] = df["Tempo Gráfico"].apply(lambda x: default_settings["interval"] if pd.isna(x) else x)
-    df["price"] = df["Valor"]
-    df["type"] = df["Tipo"]
+    # Formata o DataFrame
+    df = prepare_dataframe(df, {
+        "interval": ("Tempo Gráfico", "4h", str),
+        "price": ("Valor", None, float),
+        "type": ("Tipo", ">", str)
+    })
 
     # Cria um dicionário com as configurações
     price_settings = df.set_index("Ativo")[["interval", "price", "type"]].to_dict(orient="index")
@@ -96,15 +101,14 @@ def handle_current_price_alert(df: pd.DataFrame):
 
     return symbols_notes
 
-def handle_ma_alert(df: pd.DataFrame):
-    # Configurações padrão
-    default_settings = {"interval": "4h", "window": 20, "type": "SMA"}
-
-    # Converte os valores para o formato correto e preenche com as configurações padrão
-    df["interval"] = df["Tempo Gráfico"].apply(lambda x: default_settings["interval"] if pd.isna(x) else x)
-    df["window"] = pd.to_numeric(df["Intervalo"], errors="coerce").apply(lambda x: default_settings["window"] if pd.isna(x) else int(x))
-    df["type"] = df["Tipo de Média"].apply(lambda x: default_settings["type"] if pd.isna(x) else x)
-    df["comparison"] = df["Comparação"]
+def handle_moving_average_alert(df: pd.DataFrame):
+    # Formata o DataFrame
+    df = prepare_dataframe(df, {
+        "interval": ("Tempo Gráfico", "4h", str),
+        "window": ("Intervalo", 20, int),
+        "type": ("Tipo de Média", "SMA", str),
+        "comparison": ("Comparação", ">", str)
+    })
 
     # Cria um dicionário com as configurações
     ma_settings = df.set_index("Ativo")[["interval", "window", "type", "comparison"]].to_dict(orient="index")
@@ -149,5 +153,5 @@ ALERTS_MAP = {
     "Bollinger Bands": handle_bollinger_alert,
     "Volume": handle_volume_alert,
     "Valor Atual": handle_current_price_alert,
-    "Media Movel": handle_ma_alert
+    "Media Movel": handle_moving_average_alert
 }
