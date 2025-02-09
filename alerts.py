@@ -1,14 +1,7 @@
 import pandas as pd
 from fetch import get_klines
 from technical_analisys import check_bollinger_breach, calculate_sma, calculate_ema, compare_values
-
-# Função para preparar o DataFrame
-def prepare_dataframe(df, column_map):
-    # Ajusta os nomes das colunas, preenche valores NaN e converte colunas para os tipos corretos.
-    for col, (sheet_col,default, dtype) in column_map.items():
-        df[col] = pd.to_numeric(df[sheet_col], errors="coerce") if dtype in [int, float] else df[sheet_col]
-        df[col] = df[col].apply(lambda x: default if pd.isna(x) else dtype(x))
-    return df
+from commons import prepare_dataframe, get_message_map
 
 # Realiza a verificação da BB nos ativos com suas respectivas configurações
 def handle_bollinger_alert(df: pd.DataFrame):
@@ -40,6 +33,7 @@ def handle_bollinger_alert(df: pd.DataFrame):
       
     return symbols_notes
 
+
 def handle_volume_alert(df: pd.DataFrame):
     # Formata o DataFrame
     prepare_dataframe(df, {
@@ -67,6 +61,7 @@ def handle_volume_alert(df: pd.DataFrame):
 
     return symbols_notes
 
+
 def handle_current_price_alert(df: pd.DataFrame):
     # Formata o DataFrame
     df = prepare_dataframe(df, {
@@ -81,25 +76,21 @@ def handle_current_price_alert(df: pd.DataFrame):
     # Verifica os ativos
     symbols_notes = {}
     for symbol, settings in price_settings.items():
-        df = get_klines(symbol, interval=settings["interval"], limit=1)
+        price = settings["price"]
+        type = settings["type"]
+        interval = settings["interval"]
+
+        df = get_klines(symbol, interval=interval, limit=1)
         if df is None:
             continue
 
         last_price = float(df["close"].iloc[-1])
-        price = settings["price"]
-        type = settings["type"]
 
-        message_map = {
-            ">": f"Preço acima de {price} ↗️",
-            "<": f"Preço abaixo de {price} ↘️",
-            ">=": f"Preço igual ou acima de {price} ↗️",
-            "<=": f"Preço igual ou abaixo de {price} ↘️"
-        }
-
-        if type in message_map and compare_values(last_price, price, type):
-            symbols_notes[symbol] = message_map.get(type)
+        if compare_values(last_price, price, type):
+            symbols_notes[symbol] = get_message_map(price, type, interval)
 
     return symbols_notes
+
 
 def handle_moving_average_alert(df: pd.DataFrame):
     # Formata o DataFrame
@@ -119,33 +110,24 @@ def handle_moving_average_alert(df: pd.DataFrame):
         type = settings["type"]
         comparison = settings["comparison"]
         window = settings["window"]
+        interval = settings["interval"]
 
-        df = get_klines(symbol, interval=settings["interval"], limit=window)
+        df = get_klines(symbol, interval=interval, limit=window)
         if df is None:
             continue
-        
 
         if type == "SMA":
             result = calculate_sma(df["close"], window=window)
         else:
             result = calculate_ema(df["close"], window=window)
 
-
         last_price = float(df["close"].iloc[-1])
         last_ma = float(result.iloc[-1])
 
-        ma_text = f"{type} de {window} períodos ({settings['interval']})"
+        ma_text = f"{type} de {window} períodos"
 
-        message_map = {
-            ">": f"Preço acima da {ma_text} ↗️",
-            "<": f"Preço abaixo da {ma_text} ↘️",
-            ">=": f"Preço igual ou acima da {ma_text} ↗️",
-            "<=": f"Preço igual ou abaixo da {ma_text} ↘️",
-        }
-
-        if comparison in message_map and compare_values(last_price, last_ma, comparison):
-            symbols_notes[symbol] = message_map.get(comparison)
-
+        if compare_values(last_price, last_ma, comparison):
+            symbols_notes[symbol] = get_message_map(ma_text, comparison, interval)
     return symbols_notes
         
 
