@@ -3,7 +3,7 @@ from fetch import get_klines
 from technical_analisys import check_bollinger_breach, calculate_sma
 
 # Realiza a verificação da BB nos ativos com suas respectivas configurações
-def handle_bollinger_indicator(df: pd.DataFrame):
+def handle_bollinger_alert(df: pd.DataFrame):
     # Configurações padrão
     default_settings = {"interval": "4h", "window": 20, "window_dev": 3}
 
@@ -33,7 +33,7 @@ def handle_bollinger_indicator(df: pd.DataFrame):
       
     return symbols_notes
 
-def handle_volume_indicator(df: pd.DataFrame):
+def handle_volume_alert(df: pd.DataFrame):
     # Configurações padrão
     default_settings = {"interval": "4h", "window": 20}
 
@@ -62,7 +62,7 @@ def handle_volume_indicator(df: pd.DataFrame):
     return symbols_notes
 
 
-INDICATORS_MAP = {
-    "Bollinger Bands": handle_bollinger_indicator,
-    "Volume": handle_volume_indicator
+ALERTS_MAP = {
+    "Bollinger Bands": handle_bollinger_alert,
+    "Volume": handle_volume_alert
 }
