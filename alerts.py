@@ -25,11 +25,11 @@ def handle_bollinger_alert(df: pd.DataFrame):
         result = check_bollinger_breach(df, window=settings["window"], window_dev=settings["window_dev"])
 
         if result == -1:
-            symbols_notes[symbol] = "Preço abaixo da Banda Inferior de Bollinger ↘️"
+            symbols_notes[symbol] = f"Preço abaixo da Banda Inferior de Bollinger {settings["interval"]} ↘️"
             continue
 
         if result == 1:
-            symbols_notes[symbol] = "Preço acima da Banda Superior de Bollinger ↗️"
+            symbols_notes[symbol] = f"Preço acima da Banda Superior de Bollinger {settings["interval"]} ↗️"
       
     return symbols_notes
 
@@ -57,7 +57,7 @@ def handle_volume_alert(df: pd.DataFrame):
         last_volume_median = float(result.iloc[-1])
 
         if last_volume > last_volume_median:
-            symbols_notes[symbol] = "Volume acima da média ↗️"
+            symbols_notes[symbol] = f"Volume acima da média ({settings["interval"]}) ↗️"
 
     return symbols_notes
 
