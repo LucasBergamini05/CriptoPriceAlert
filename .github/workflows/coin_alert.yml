@@ -27,4 +27,4 @@ jobs:
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           BINANCE_API_LINK: https://api.binance.us
-        run: python main.py
+        run: python app/main.py
