@@ -31,7 +31,7 @@ def handle_bollinger_alert(df: pd.DataFrame):
             continue
 
         if result == 1:
-            symbols_notes[symbol] = f"Preço acima da Banda Superior de Bollinger {interval} ↗️"
+            symbols_notes[symbol] = f"Preço acima da Banda Superior de Bollinger ({interval}) ↗️"
       
     return symbols_notes
 
@@ -57,11 +57,16 @@ def handle_volume_alert(df: pd.DataFrame):
         
         result = calculate_sma(klines_df["volume"], window=window)
 
+        last_open = float(klines_df["open"].iloc[-1])
+        last_close = float(klines_df["close"].iloc[-1])
+
         last_volume = float(klines_df["volume"].iloc[-1])
         last_volume_median = float(result.iloc[-1])
 
+        candle_color = "verde" if last_close > last_open else "vermelho"
+
         if last_volume > last_volume_median:
-            symbols_notes[symbol] = f"Volume acima da média ({interval}) ↗️"
+            symbols_notes[symbol] = f"Volume acima da média em candle {candle_color} ({interval}) ↗️"
 
     return symbols_notes
 
