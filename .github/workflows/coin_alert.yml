@@ -27,4 +27,6 @@ jobs:
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           BINANCE_API_LINK: https://api.binance.us
+          LAST_ALERTS_GIST_ID: 4640b8c007bac7b9d2b06f95d0cb5778
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
         run: python app/main.py
