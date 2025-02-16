@@ -40,12 +40,13 @@ def handle_volume_alert(df: pd.DataFrame, symbols_notes: dict[str, list[str]]):
         "symbol": ("Ativo", None, str),
         "interval": ("Tempo Gráfico", "4h", str),
         "window": ("Intervalo", 20, int),
-        "candle_type": ("Tipo de Candle", "Ascendente", str),
+        "candle_type": ("Tipo de Candle", "Indiferente", str),
+        "threshold": ("Limite", 0, float),
     })
 
     # Verifica os ativos
     for row in df.itertuples():
-        symbol, interval, window, candle_type = row.symbol, row.interval, row.window, row.candle_type
+        symbol, interval, window, candle_type, threshold= row.symbol, row.interval, row.window, row.candle_type, row.threshold
 
         klines_df = get_klines(symbol, interval=interval, limit=window)
         if klines_df is None:
@@ -61,7 +62,10 @@ def handle_volume_alert(df: pd.DataFrame, symbols_notes: dict[str, list[str]]):
 
         current_candle_type = "Ascendente" if last_close > last_open else "Descendente"
 
-        valid_volume = last_volume > last_volume_median
+        volume_diff = (last_volume - last_volume_median) / last_volume_median
+
+        valid_volume = last_volume > last_volume_median and volume_diff > threshold
+
 
         valid_candle = candle_type == "Indiferente" or candle_type == current_candle_type
 
