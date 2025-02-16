@@ -3,6 +3,7 @@ from check import check
 
 # Fluxo Principal
 def main():
+    print("🔍 Verificando alertas de preços...")
     assets_notes = check()
 
     if assets_notes:

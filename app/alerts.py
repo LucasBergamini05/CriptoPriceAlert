@@ -40,7 +40,8 @@ def handle_volume_alert(df: pd.DataFrame):
     # Formata o DataFrame
     prepare_dataframe(df, {
         "interval": ("Tempo Gráfico", "4h", str),
-        "window": ("Intervalo", 20, int)
+        "window": ("Intervalo", 20, int),
+        "candle_type": ("Tipo de Candle", "Ascendente", str),
     })
 
     # Cria um dicionário com as configurações
@@ -49,7 +50,7 @@ def handle_volume_alert(df: pd.DataFrame):
     # Verifica os ativos
     symbols_notes = {}
     for symbol, settings in volume_settings.items():
-        interval, window = (settings.get(k) for k in ("interval", "window"))
+        interval, window, candle_type = (settings.get(k) for k in ("interval", "window", "candle_type"))
 
         klines_df = get_klines(symbol, interval=interval, limit=window)
         if klines_df is None:
@@ -63,10 +64,14 @@ def handle_volume_alert(df: pd.DataFrame):
         last_volume = float(klines_df["volume"].iloc[-1])
         last_volume_median = float(result.iloc[-1])
 
-        candle_color = "verde" if last_close > last_open else "vermelho"
+        current_candle_type = "Ascendente" if last_close > last_open else "Descendente"
 
-        if last_volume > last_volume_median:
-            symbols_notes[symbol] = f"Volume acima da média em candle {candle_color} ({interval}) ↗️"
+        valid_volume = last_volume > last_volume_median
+
+        valid_candle = candle_type == "Indiferente" or candle_type == current_candle_type
+
+        if valid_volume and valid_candle:
+            symbols_notes[symbol] = f"Volume acima da média em candle {current_candle_type} ({interval}) ↗️"
 
     return symbols_notes
 
