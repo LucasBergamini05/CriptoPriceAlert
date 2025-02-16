@@ -17,3 +17,10 @@ def get_message_map(metric, comparison, interval):
         ">=": f"Preço igual ou acima de {metric} ({interval}) ↗️",
         "<=": f"Preço igual ou abaixo de {metric} ({interval}) ↘️",
     }.get(comparison)
+
+
+# Função para adicionar nota ao símbolo
+def add_symbol_note(symbols_notes, symbol, message):
+    if symbol not in symbols_notes:
+        symbols_notes[symbol] = []
+    symbols_notes[symbol].append(message)

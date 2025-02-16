@@ -18,13 +18,7 @@ def check():
                 continue
 
             # Chama a função do alerta com os dados obtidos
-            alert_note = alert_func(df)
-
-            # Adiciona as notas ao dicionário
-            for symbol, symbol_notes in alert_note.items():
-                if symbol not in notes:
-                    notes[symbol] = []
-                notes[symbol].append(symbol_notes)
+            notes = alert_func(df, notes)
 
         except Exception as e:
             print(f"⚠️ Erro ao verificar alerta {alert_name}: {e}")
