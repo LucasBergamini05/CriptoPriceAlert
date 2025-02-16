@@ -3,7 +3,7 @@ from fetch import get_settings
 
 # Realiza a verificação dos alertas
 def check():
-    notes = {}
+    notes: dict[str, list[str]] = {}
     for alert_name, alert_func in ALERTS_MAP.items():
         try:
             # Pega as configurações da aba correspondente

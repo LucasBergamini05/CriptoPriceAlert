@@ -1,16 +1,14 @@
 from mail import send_email
 from check import check
+from last_alerts import handle_alerts
 
 # Fluxo Principal
 def main():
     print("🔍 Verificando alertas de preços...")
-    assets_notes = check()
+    assets_notes = handle_alerts(check())
 
     if assets_notes:
-        print("⚠️ Alerta de preços:\n", assets_notes)
         send_email(assets_notes)
-    else:
-        print("✅ Nenhum alerta de preço.")
 
 # Executa o script
 if __name__ == "__main__":

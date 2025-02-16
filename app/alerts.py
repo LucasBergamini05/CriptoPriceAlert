@@ -4,7 +4,7 @@ from technical_analisys import check_bollinger_breach, calculate_sma, calculate_
 from commons import prepare_dataframe, get_message_map, add_symbol_note
 
 # Verifica se o preço atual está fora das Bandas de Bollinger
-def handle_bollinger_alert(df: pd.DataFrame, symbols_notes):
+def handle_bollinger_alert(df: pd.DataFrame, symbols_notes: dict[str, list[str]]):
     # Formata o DataFrame
     df = prepare_dataframe(df, {
         "symbol": ("Ativo", None, str),
@@ -34,7 +34,7 @@ def handle_bollinger_alert(df: pd.DataFrame, symbols_notes):
 
 
 #  Comparação do volume atual com sua média móvel
-def handle_volume_alert(df: pd.DataFrame, symbols_notes):
+def handle_volume_alert(df: pd.DataFrame, symbols_notes: dict[str, list[str]]):
     # Formata o DataFrame
     df = prepare_dataframe(df, {
         "symbol": ("Ativo", None, str),
@@ -72,7 +72,7 @@ def handle_volume_alert(df: pd.DataFrame, symbols_notes):
 
 
 # Compara o preço atual com um valor
-def handle_current_price_alert(df: pd.DataFrame, symbols_notes):
+def handle_current_price_alert(df: pd.DataFrame, symbols_notes: dict[str, list[str]]):
     # Formata o DataFrame
     df = prepare_dataframe(df, {
         "symbol": ("Ativo", None, str),
@@ -97,7 +97,7 @@ def handle_current_price_alert(df: pd.DataFrame, symbols_notes):
 
 
 # Compara o preço atual com uma média móvel
-def handle_moving_average_alert(df: pd.DataFrame, symbols_notes):
+def handle_moving_average_alert(df: pd.DataFrame, symbols_notes: dict[str, list[str]]):
     # Formata o DataFrame
     df = prepare_dataframe(df, {
         "symbol": ("Ativo", None, str),
